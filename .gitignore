@@ -1,3 +1,27 @@
 __pycache__
 .idea
 .ipynb_checkpoints
+bin/
+        compiler_compat/
+        conda-meta/
+        doc/
+        etc/
+        include/
+        lib/
+        libexec/
+        licensing/
+        man/
+        mkspecs/
+        mysql-test/
+        mysql/
+        phrasebooks/
+        plugins/
+        qml/
+        resources/
+        sbin/
+        share/
+        ssl/
+        translations/
+        var/
+        x86_64-conda-linux-gnu/
+        x86_64-conda_cos7-linux-gnu/
