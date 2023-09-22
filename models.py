@@ -58,6 +58,41 @@ class DownSamplingBlock(nn.Module):
         return self.blocks(net)
 
 
+class SmallUnet(nn.Module):
+    def __init__(self):
+        super(SmallUnet, self).__init__()
+        self.init_conv = Stacked2ConvsBlock(3, 64)
+
+        self.downsample_1 = DownSamplingBlock(64, 128)
+        self.downsample_2 = DownSamplingBlock(128, 256)
+        self.downsample_3 = DownSamplingBlock(256, 512)
+
+        self.upconv = Stacked2ConvsBlock(512, 256)
+
+        self.upsample_1 = UpSamplingBlock(256, 128)
+        self.upsample_2 = UpSamplingBlock(128, 64)
+        self.upsample_3 = UpSamplingBlock(64, 64)
+
+        self.agg_conv = nn.Conv2d(64, 1, kernel_size=1)
+
+    def forward(self, x):
+        net0 = self.init_conv(x)  # 3 --> 64
+
+        net1 = self.downsample_1(net0)  # 64 --> 128
+        net2 = self.downsample_2(net1)  # 128 --> 256
+        net = self.downsample_3(net2)  # 256 --> 512
+
+        net = self.upconv(net)  # 512 --> 256
+
+        net = self.upsample_1(net2, net)  # 256 --> 128
+        net = self.upsample_2(net1, net)  # 128 --> 64
+        net = self.upsample_3(net0, net)  # 64 --> 64
+
+        net = self.agg_conv(net)  # 64 --> 1
+
+        return net
+
+
 class Unet(nn.Module):
     def __init__(self):
         super(Unet, self).__init__()
@@ -96,41 +131,6 @@ class Unet(nn.Module):
         net = self.upsample_2(net2, net)  # 256 --> 128
         net = self.upsample_3(net1, net)  # 128 --> 64
         net = self.upsample_4(net0, net)  # 64 --> 64
-
-        net = self.agg_conv(net)  # 64 --> 1
-
-        return net
-
-
-class SmallUnet(nn.Module):
-    def __init__(self):
-        super(SmallUnet, self).__init__()
-        self.init_conv = Stacked2ConvsBlock(3, 64)
-
-        self.downsample_1 = DownSamplingBlock(64, 128)
-        self.downsample_2 = DownSamplingBlock(128, 256)
-        self.downsample_3 = DownSamplingBlock(256, 512)
-
-        self.upconv = Stacked2ConvsBlock(512, 256)
-
-        self.upsample_1 = UpSamplingBlock(256, 128)
-        self.upsample_2 = UpSamplingBlock(128, 64)
-        self.upsample_3 = UpSamplingBlock(64, 64)
-
-        self.agg_conv = nn.Conv2d(64, 1, kernel_size=1)
-
-    def forward(self, x):
-        net0 = self.init_conv(x)  # 3 --> 64
-
-        net1 = self.downsample_1(net0)  # 64 --> 128
-        net2 = self.downsample_2(net1)  # 128 --> 256
-        net = self.downsample_3(net2)  # 256 --> 512
-
-        net = self.upconv(net)  # 512 --> 256
-
-        net = self.upsample_1(net2, net)  # 256 --> 128
-        net = self.upsample_2(net1, net)  # 128 --> 64
-        net = self.upsample_3(net0, net)  # 64 --> 64
 
         net = self.agg_conv(net)  # 64 --> 1
 
