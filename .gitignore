@@ -26,3 +26,4 @@ var/
 x86_64-conda-linux-gnu/
 x86_64-conda_cos7-linux-gnu/
 task_student (1).ipynb
+dist/
