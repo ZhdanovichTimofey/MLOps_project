@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "study project"
 authors = ["ZhdanovichTimofey <zhdanovich.tv@phystech.edu>"]
 readme = "README.md"
+repository = "https://github.com/ZhdanovichTimofey/MLOps_project.git"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
