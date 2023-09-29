@@ -13,6 +13,17 @@ torch = "^2.0.1"
 matplotlib = "^3.8.0"
 tqdm = "^4.66.1"
 
+[tool.black]
+line-length = 90
+target-version = ["py39"]
+
+[tool.isort]
+src_paths = ["mlopsproject"]
+profile = "black"
+line_length = 90
+lines_after_imports = 2
+
+
 
 [build-system]
 requires = ["poetry-core"]
