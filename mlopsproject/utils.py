@@ -1,22 +1,23 @@
+import os
+
 import matplotlib.pyplot as plt
 import torch
-import os
-from tqdm.notebook import tqdm
-from metrics import iou
 from IPython.display import clear_output
+from metrics import iou
+from tqdm.notebook import tqdm
 
 
 def train(
-        segment_model,
-        optimizer,
-        criterion,
-        train_dataloader,
-        val_dataloader,
-        state_dict_path,
-        device="cpu",
-        n_epochs=20,
-        show_interval=20,
-        savefig_dir=None,
+    segment_model,
+    optimizer,
+    criterion,
+    train_dataloader,
+    val_dataloader,
+    state_dict_path,
+    device="cpu",
+    n_epochs=20,
+    show_interval=20,
+    savefig_dir=None,
 ):
     # Set history
     history = {}
@@ -39,7 +40,7 @@ def train(
     n_train_batches = len(train_dataloader)
     n_val_batches = len(val_dataloader)
 
-    best_val_iou = 0.
+    best_val_iou = 0.0
 
     end_epoch = start_epoch + n_epochs
 
@@ -53,8 +54,8 @@ def train(
 
         segment_model.train()
 
-        train_loss = 0.
-        train_iou = 0.
+        train_loss = 0.0
+        train_iou = 0.0
 
         for i, (image, mask) in enumerate(tqdm(train_dataloader)):
             image = image.to(device)
@@ -71,7 +72,7 @@ def train(
 
             loss_ = float(loss.detach().data)
             # предсказываем маску по вероятности 0.5 <=> logit > 0
-            iou_ = float(iou(pred.detach() > 0., mask > 0).data)
+            iou_ = float(iou(pred.detach() > 0.0, mask > 0).data)
 
             train_loss += loss_
             train_iou += iou_
@@ -82,14 +83,13 @@ def train(
         history["train_loss"].append(train_loss)
         history["train_iou"].append(train_iou)
 
-        print('')
-        print(f"Total Train:\tloss\t{train_loss:.5f}"
-              f"\t\tIoU\t{train_iou:.5f}")
+        print("")
+        print(f"Total Train:\tloss\t{train_loss:.5f}" f"\t\tIoU\t{train_iou:.5f}")
 
         segment_model.eval()
 
-        val_loss = 0.
-        val_iou = 0.
+        val_loss = 0.0
+        val_iou = 0.0
 
         with torch.no_grad():
             for image, mask in tqdm(val_dataloader):
@@ -98,7 +98,7 @@ def train(
                 loss = criterion(pred, mask.float())
                 loss_ = float(loss.data)
                 # предсказываем маску по вероятности 0.5 <=> logit > 0
-                iou_ = float(iou(pred > 0., mask > 0).data)
+                iou_ = float(iou(pred > 0.0, mask > 0).data)
 
                 val_iou += iou_
                 val_loss += loss_
@@ -110,19 +110,24 @@ def train(
         history["val_iou"].append(val_iou)
 
         if history["val_iou"][-1] > best_val_iou:
-            torch.save({
-                "model": segment_model.state_dict(),
-                "optimizer": optimizer.state_dict(),
-                "history": history,
-                "epoch": epoch,
-            }, state_dict_path)
+            torch.save(
+                {
+                    "model": segment_model.state_dict(),
+                    "optimizer": optimizer.state_dict(),
+                    "history": history,
+                    "epoch": epoch,
+                },
+                state_dict_path,
+            )
             best_val_iou = history["val_iou"][-1]
 
-        print('')
-        print(f"Total Valid:\tloss\t{val_loss:.5f}"
-              f"\t\tIoU\t{val_iou:.5f}"
-              f"\t\tbest IoU\t{best_val_iou:.5f}")
-        print('-' * 100)
+        print("")
+        print(
+            f"Total Valid:\tloss\t{val_loss:.5f}"
+            f"\t\tIoU\t{val_iou:.5f}"
+            f"\t\tbest IoU\t{best_val_iou:.5f}"
+        )
+        print("-" * 100)
 
         clear_output(wait=True)
 
@@ -131,15 +136,15 @@ def train(
             plt.figure(figsize=(12, 4))
 
             plt.subplot(1, 2, 1)
-            plt.plot(history["train_loss"], label='train')
-            plt.plot(history["val_loss"], label='test')
+            plt.plot(history["train_loss"], label="train")
+            plt.plot(history["val_loss"], label="test")
             plt.title("Loss")
             plt.legend()
 
             plt.subplot(1, 2, 2)
-            plt.plot(history["train_iou"], label='train')
-            plt.plot(history["val_iou"], label='test')
+            plt.plot(history["train_iou"], label="train")
+            plt.plot(history["val_iou"], label="test")
             plt.title("IoU")
-            plt.legend();
+            plt.legend()
 
             plt.show()

@@ -1,8 +1,9 @@
 import os
-from torch.utils.data import Dataset
+
 import numpy as np
-from PIL import Image
 import torch
+from PIL import Image
+from torch.utils.data import Dataset
 
 
 class CellsDataset(Dataset):
@@ -44,8 +45,8 @@ class CellsDataset(Dataset):
         # применяем аугментацию
         if self.aug:
             augmented = self.aug(image=input, mask=target)
-            input = augmented['image']
-            target = augmented['mask']
+            input = augmented["image"]
+            target = augmented["mask"]
 
         # исправим порядок размерностей
         input = input.transpose(2, 0, 1)

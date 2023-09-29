@@ -1,13 +1,18 @@
-from torch import nn
 import torch
+from torch import nn
 
 
 def conv_bn_relu(in_channels, out_channels, kernel=3, stride=1, padding=1):
     net = nn.Sequential(
-        nn.Conv2d(in_channels, out_channels,
-                  kernel_size=kernel, stride=stride, padding=padding),
+        nn.Conv2d(
+            in_channels,
+            out_channels,
+            kernel_size=kernel,
+            stride=stride,
+            padding=padding,
+        ),
         nn.BatchNorm2d(num_features=out_channels),
-        nn.ReLU(inplace=True)
+        nn.ReLU(inplace=True),
     )
     return net
 
@@ -17,7 +22,7 @@ class Stacked2ConvsBlock(nn.Module):
         super(Stacked2ConvsBlock, self).__init__()
         self.blocks = nn.Sequential(
             conv_bn_relu(in_channels, out_channels),
-            conv_bn_relu(out_channels, out_channels)
+            conv_bn_relu(out_channels, out_channels),
         )
 
     def forward(self, net):
@@ -31,7 +36,8 @@ class UpSamplingBlock(nn.Module):
 
         # Понижаем число каналов
         self.upsample = nn.ConvTranspose2d(
-            in_channels, in_channels, kernel_size=2, stride=2)
+            in_channels, in_channels, kernel_size=2, stride=2
+        )
 
         # Стакаем с симметричным слоем из левой половины "U".
         # Число каналов входной карты при этом удваивается.
@@ -50,8 +56,7 @@ class DownSamplingBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DownSamplingBlock, self).__init__()
         self.blocks = nn.Sequential(
-            nn.MaxPool2d(2, 2),
-            Stacked2ConvsBlock(in_channels, out_channels)
+            nn.MaxPool2d(2, 2), Stacked2ConvsBlock(in_channels, out_channels)
         )
 
     def forward(self, net):
